@@ -45,6 +45,7 @@ def cli():
 
     # diarization params
     parser.add_argument("--diarize", action="store_true", help="Apply diarization to assign speaker labels to each segment/word")
+    parser.add_argument("--diarize_model", default="pyannote/speaker-diarization-3.1", help="Name of model to do diarization")
     parser.add_argument("--min_speakers", default=None, type=int, help="Minimum number of speakers to in audio file")
     parser.add_argument("--max_speakers", default=None, type=int, help="Maximum number of speakers to in audio file")
 
@@ -216,7 +217,8 @@ def cli():
         tmp_results = results
         print(">>Performing diarization...")
         results = []
-        diarize_model = DiarizationPipeline(use_auth_token=hf_token, device=device)
+        diarize_model_name: str = args.pop("diarize_model")
+        diarize_model = DiarizationPipeline(model_name=diarize_model_name, use_auth_token=hf_token, device=device)
         for result, input_audio_path in tmp_results:
             diarize_segments = diarize_model(input_audio_path, min_speakers=min_speakers, max_speakers=max_speakers)
             result = assign_word_speakers(diarize_segments, result)
